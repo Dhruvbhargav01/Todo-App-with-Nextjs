@@ -2,7 +2,7 @@
 
 A modern **Todo List Web Application** built using **Next.js (SSR)** and **Supabase**. This project implements user authentication, todo CRUD operations, and a server-side rendered dashboard with a clean UI using **shadcn UI components**.  
 
-Live :- https://todo-app-with-nextjs-swart.vercel.app/
+Live :- [https://todo-app-with-nextjs-swart.vercel.app/](https://todo-app-with-nextjs-swart.vercel.app/)
 ---
 
 ## Table of Contents
@@ -16,6 +16,12 @@ Live :- https://todo-app-with-nextjs-swart.vercel.app/
 - [Demo](#demo)  
 
 ---
+
+#Screenshots
+
+1. HomePage <img width="1920" height="1080" alt="Screenshot 2025-12-09 215420" src="https://github.com/user-attachments/assets/62753602-aafc-4a5b-8837-b41454491fb3" />
+2. Login/Signup - <img width="1920" height="1080" alt="Screenshot 2025-12-09 215732" src="https://github.com/user-attachments/assets/44b37ec2-bef4-443e-969a-5f1dda3a90c7" />
+3. Dashboard - <img width="1920" height="1080" alt="Screenshot 2025-12-09 215630" src="https://github.com/user-attachments/assets/a31efef7-5427-417a-86e2-acec0701e5a4" />
 
 ## Features
 
