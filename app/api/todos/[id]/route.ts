@@ -1,37 +1,49 @@
-import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabaseServer';
+import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
-  try {
-    const { id } = params;
-    const { data, error } = await supabaseAdmin.from('todos').select('*').eq('id', id).single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 404 });
-    return NextResponse.json(data);
-  } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+
+  const { data, error } = await supabase
+    .from("todos")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  return NextResponse.json(data);
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  try {
-    const { id } = params;
-    const updates = await req.json();
-    updates.updated_at = new Date().toISOString();
-    const { data, error } = await supabaseAdmin.from('todos').update(updates).eq('id', id).select().single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
-  } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+
+  const { error } = await supabase
+    .from("todos")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  return NextResponse.json({ message: "Todo deleted" });
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  try {
-    const { id } = params;
-    const { error } = await supabaseAdmin.from('todos').delete().eq('id', id);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  const body = await request.json();
+
+  const { error } = await supabase
+    .from("todos")
+    .update(body)
+    .eq("id", id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  return NextResponse.json({ message: "Todo updated" });
 }
