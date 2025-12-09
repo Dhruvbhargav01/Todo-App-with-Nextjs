@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { useRouter } from 'next/navigation';
+import Navbar from '@/components/Navbar';
 import TodoForm from '@/components/TodoForm';
 import TodoItem from '@/components/TodoItem';
-import Navbar from '@/components/Navbar';
 
 type Todo = {
   id: string;
@@ -14,42 +13,44 @@ type Todo = {
   is_complete: boolean;
 };
 
-export default function Dashboard() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
+export default function DashboardPage() {
   const [session, setSession] = useState<any>(null);
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const init = async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
-        router.replace('/login');
+        window.location.href = '/login';
         return;
       }
-
       setSession(data.session);
-
-      const { data: todosData } = await supabase
-        .from('todos')
-        .select('*')
-        .eq('user_id', data.session.user.id)
-        .order('created_at', { ascending: false });
-
-      setTodos(todosData || []);
-      setLoading(false);
+      fetchTodos(data.session.user.id);
     };
 
     init();
-  }, [router]);
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, s) => {
+      if (!s) window.location.href = '/login';
+      else {
+        setSession(s);
+        fetchTodos(s.user.id);
+      }
+    });
+
+    return () => listener.subscription?.unsubscribe();
+  }, []);
+
+  const fetchTodos = async (userId: string) => {
+    const { data } = await supabase.from('todos').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+    setTodos(data || []);
+    setLoading(false);
+  };
 
   const addTodo = async ({ title, description }: { title: string; description?: string }) => {
     if (!session) return;
-    const { data } = await supabase.from('todos').insert({
-      user_id: session.user.id,
-      title,
-      description,
-    }).select().single();
+    const { data } = await supabase.from('todos').insert({ user_id: session.user.id, title, description }).select().single();
     if (data) setTodos(prev => [data, ...prev]);
   };
 
@@ -63,18 +64,10 @@ export default function Dashboard() {
     setTodos(prev => prev.filter(todo => todo.id !== id));
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 text-gray-900">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (!session) return null;
+  if (loading) return <div className="flex min-h-screen items-center justify-center bg-white"><p className="text-gray-700">Loading...</p></div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-white text-gray-800">
       <Navbar />
       <div className="max-w-4xl mx-auto p-6">
         <h1 className="text-3xl font-semibold mb-6">My Todo Dashboard</h1>
@@ -82,12 +75,7 @@ export default function Dashboard() {
         <div className="mt-6 space-y-4">
           {todos.length === 0 && <p className="text-gray-500">No todos yet.</p>}
           {todos.map(todo => (
-            <TodoItem
-              key={todo.id}
-              todo={todo}
-              onUpdate={updateTodo}
-              onDelete={deleteTodo}
-            />
+            <TodoItem key={todo.id} todo={todo} onUpdate={updateTodo} onDelete={deleteTodo} />
           ))}
         </div>
       </div>
