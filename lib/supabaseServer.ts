@@ -13,3 +13,7 @@ export const supabaseAdmin = createClient(url, serviceRoleKey, {
     // server side only
   }
 });
+
+
+
+
