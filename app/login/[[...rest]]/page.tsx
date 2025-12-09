@@ -11,22 +11,28 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password,
+  });
 
-    setLoading(false);
+  console.log('LOGIN RESULT:', { data, error }); // 👈 ye add karo
 
-    if (error) {
-      setError(error.message);
-      return;
-    }
+  setLoading(false);
 
-    router.push('/dashboard');
-  };
+  if (error) {
+    setError(error.message);
+    return;
+  }
+
+  router.push('/dashboard');
+};
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black relative overflow-hidden">
